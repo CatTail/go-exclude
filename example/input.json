@@ -1,0 +1,16 @@
+{
+    "cattail": {
+        "553ec650fd4f90003774e2ff00b10bc9aa9ec802": {
+            "pre-commit": ["test1", "test2"],
+            "commit-msg": ["test1"]
+        }
+    },
+    "tengyue": {
+        "553ec650fd4f90003774e2ff00b10bc9aa9ec802": {
+            "pre-commit": ["test1", "test2"]
+        },
+        "844fda341c6e087480af171534a5b1ccaa72d70c": {
+            "pre-commit": ["test1"]
+        }
+    }
+}
