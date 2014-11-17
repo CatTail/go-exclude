@@ -4,40 +4,48 @@ import (
 	"reflect"
 )
 
-func Exclude(data, excludes interface{}) {
-	excludeInternal(reflect.ValueOf(data), reflect.ValueOf(excludes))
+func Exclude(input, rules interface{}) {
+	excludeInternal(reflect.ValueOf(input), reflect.ValueOf(rules))
 }
 
-func excludeInternal(data, excludes reflect.Value) {
-	if data.Type().Kind() == reflect.Interface {
-		data = data.Elem()
+// input and rules are always maps
+func excludeInternal(input, rules reflect.Value) {
+	// restore original value by Elm()
+	if input.Type().Kind() == reflect.Interface {
+		input = input.Elem()
 	}
-	if excludes.Type().Kind() == reflect.Interface {
-		excludes = excludes.Elem()
+	if rules.Type().Kind() == reflect.Interface {
+		rules = rules.Elem()
 	}
-	if excludes.MapIndex(reflect.ValueOf("*")).IsValid() {
-		for _, key := range data.MapKeys() {
-			excludeInternal(data.MapIndex(key), excludes.MapIndex(reflect.ValueOf("*")))
+	if rules.MapIndex(reflect.ValueOf("*")).IsValid() {
+		for _, key := range input.MapKeys() {
+			excludeInternal(input.MapIndex(key), rules.MapIndex(reflect.ValueOf("*")))
 		}
 	} else {
-		for _, key := range data.MapKeys() {
-			value := data.MapIndex(key)
-			exclude := excludes.MapIndex(key)
-			if exclude.IsValid() {
-				if exclude.Type().Kind() == reflect.Interface {
-					exclude = exclude.Elem()
+		for _, key := range input.MapKeys() {
+			value := input.MapIndex(key)
+			rule := rules.MapIndex(key)
+
+			if rule.IsValid() {
+				// restore original value by Elm()
+				if value.Type().Kind() == reflect.Interface {
+					value = value.Elem()
 				}
-				switch exclude.Type().Kind() {
+				if rule.Type().Kind() == reflect.Interface {
+					rule = rule.Elem()
+				}
+
+				switch rule.Type().Kind() {
 				case reflect.Slice:
-					for i := 0; i < exclude.Len(); i++ {
-						data.SetMapIndex(key, remove(value, find(value, exclude.Index(i))))
+					for i := 0; i < rule.Len(); i++ {
+						input.SetMapIndex(key, remove(value, find(value, rule.Index(i))))
 					}
 				case reflect.String:
-					if exclude.Interface() == "*" {
-						data.SetMapIndex(key, reflect.ValueOf(make(map[string][]string)))
+					if rule.Interface() == "*" {
+						input.SetMapIndex(key, reflect.Value{})
 					}
 				case reflect.Map:
-					excludeInternal(value, exclude)
+					excludeInternal(value, rule)
 				}
 			}
 		}
