@@ -9,4 +9,6 @@
 
 ## Usage
 
-    exclude.Exclude(data, rules)
+    exclude.Exclude(input, rules)
+
+See [exclude_test.go](exclude_test.go)
