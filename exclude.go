@@ -64,7 +64,7 @@ func find(array, item reflect.Value) (index int) {
 }
 
 func remove(array reflect.Value, index int) reflect.Value {
-	if index < 0 || index > array.Len() {
+	if index < 0 || index >= array.Len() {
 		return array
 	}
 	return reflect.AppendSlice(array.Slice(0, index), array.Slice(index+1, array.Len()))
